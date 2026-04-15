@@ -64,6 +64,8 @@
 - [x] 2.2 Baseline: error rate 0.1%, p50 45ms, p99 320ms
 - [x] 3.1 CI deploys via `deploy.sh prod backend --build --infra --yes`
 - [x] 3.2 New revision serving: `curl api.tapclaw.app/health → v1.5.2`
+- [x] 4.1 Canary plan executed (see Canary Plan section below)
+- [x] 4.2 Canary verdict: GO at all 3 stages
 - [x] 5.1 Smoke test: `deploy.sh prod --verify` PASS
 - [x] 6.1 Monitor 15 min: error rate 0.08% (within baseline)
 - [x] 6.4 Notified #deployments: "v1.5.2 backend deployed. SUCCESS"

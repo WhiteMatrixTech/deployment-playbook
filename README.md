@@ -137,10 +137,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Verify all 4 artifacts present
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          BODY="${{ github.event.issue.body }}"
-          for section in "Test Report" "Deployment Plan" "Canary" "Rollback Plan"; do
-            if ! echo "$BODY" | grep -qi "$section"; then
+          for section in "测试报告" "部署计划" "灰度" "回滚计划"; do
+            if ! echo "$ISSUE_BODY" | grep -qi "$section"; then
               echo "::error::Missing required artifact: $section"
               exit 1
             fi
@@ -171,7 +172,6 @@ deployment-playbook/
 │   ├── pre-deploy.md                   # Gate checks before deploying
 │   ├── post-deploy.md                  # Verification after deploying
 │   └── incident-response.md           # When a deployment goes wrong
-└── CLAUDE.md                           # Agent instructions for using templates
 ```
 
 ## Supported Platforms

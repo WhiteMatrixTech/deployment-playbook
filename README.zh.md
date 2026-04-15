@@ -139,10 +139,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 验证 4 个产物是否齐全
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          BODY="${{ github.event.issue.body }}"
-          for section in "Test Report" "Deployment Plan" "Canary" "Rollback Plan"; do
-            if ! echo "$BODY" | grep -qi "$section"; then
+          for section in "测试报告" "部署计划" "灰度" "回滚计划"; do
+            if ! echo "$ISSUE_BODY" | grep -qi "$section"; then
               echo "::error::缺少必须产物: $section"
               exit 1
             fi
@@ -172,7 +173,6 @@ deployment-playbook/
 │   ├── pre-deploy.md                   # 部署前门禁检查
 │   ├── post-deploy.md                  # 部署后验证
 │   └── incident-response.md            # 部署事故响应
-└── CLAUDE.md                           # Agent 使用指南
 ```
 
 ## 支持的平台

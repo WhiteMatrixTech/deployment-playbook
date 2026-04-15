@@ -17,7 +17,7 @@
 
 ## Prerequisites
 
-- [ ] Test report completed and verdict = PASS ([link to test report](#))
+- [ ] Test report completed and verdict = PASS ([test-report.md](./test-report.md))
 - [ ] PR merged to target branch (or tag pushed)
 - [ ] No active incidents on target environment
 - [ ] Deployment window confirmed with team (for High/Critical)
@@ -62,7 +62,7 @@
 
 ### Phase 4: Canary (if applicable)
 
-- [ ] **4.1** Follow canary plan: [link to canary-plan.md](#)
+- [ ] **4.1** Follow canary plan: [canary-plan.md](./canary-plan.md)
 - [ ] **4.2** Record canary metrics at each gate
 - [ ] **4.3** Canary verdict: GO / NO-GO
 
