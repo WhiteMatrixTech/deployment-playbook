@@ -1,0 +1,197 @@
+name: 部署请求 / Deployment Request
+description: 申请生产部署（包含全部 4 个必须产物）
+title: "[部署] <服务名> <版本> → <环境>"
+labels: ["deployment"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 部署请求
+
+        填写以下全部内容。每次部署必须包含 4 个产物：测试报告、部署计划、灰度计划、回滚计划。
+
+        > 模板参考：[deployment-playbook/templates/](https://github.com/WhiteMatrixTech/deployment-playbook/tree/main/templates)
+
+  - type: input
+    id: service
+    attributes:
+      label: 服务 / Service
+      description: 部署哪些服务？
+      placeholder: "backend, frontend, litellm, pool"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / 镜像标签
+      placeholder: "prod-20260414-a1b2c3d 或 v1.5.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: 目标环境
+      options:
+        - dev（开发）
+        - staging / beta（预发布）
+        - production（生产）
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: 风险等级
+      options:
+        - Low — 单服务、无迁移、无破坏性变更
+        - Medium — 多服务或小型迁移
+        - High — 破坏性变更、大型迁移、新基础设施
+        - Critical — 数据迁移、安全补丁、多区域
+    validations:
+      required: true
+
+  - type: input
+    id: pr
+    attributes:
+      label: 关联 PR
+      description: 本次部署的 PR 链接
+      placeholder: "#123"
+    validations:
+      required: true
+
+  - type: input
+    id: deployer
+    attributes:
+      label: 部署负责人
+      placeholder: "@username"
+    validations:
+      required: true
+
+  - type: input
+    id: rollback_owner
+    attributes:
+      label: 回滚负责人
+      placeholder: "@username（可与部署负责人相同）"
+    validations:
+      required: true
+
+  - type: textarea
+    id: test-report
+    attributes:
+      label: "产物 1：测试报告"
+      description: "参考 templates/test-report.md 填写，或贴链接"
+      value: |
+        ### 测试结论：PASS / 有条件通过 / FAIL
+
+        | 测试类型 | 通过 | 失败 | 覆盖率 |
+        |---------|------|------|-------|
+        | 单元测试 | | | % |
+        | 集成测试 | | | |
+        | E2E 测试 | | | |
+
+        **安全扫描**：干净 / 有发现（详述）
+
+        **已知问题**：
+        - [ ] 无
+        - [ ] `<问题>`：接受原因 `<理由>`
+
+        **签署人**：`<姓名>` `<日期>`
+    validations:
+      required: true
+
+  - type: textarea
+    id: deployment-plan
+    attributes:
+      label: "产物 2：部署计划"
+      description: "逐步操作 + checkbox。参考 templates/deployment-plan.md"
+      value: |
+        ### 部署窗口：`YYYY-MM-DD HH:MM – HH:MM UTC`
+
+        ### 前置检查
+        - [ ] 测试报告结论 = PASS
+        - [ ] PR 已合并到目标分支
+        - [ ] 目标环境无进行中的事故
+        - [ ] 回滚计划已 review
+
+        ### 部署步骤
+        - [ ] **1.1** 触发构建：`<具体命令>`
+        - [ ] **1.2** 验证构建成功，记录镜像标签：`<tag>`
+        - [ ] **2.1** 部署前检查清单完成
+        - [ ] **2.2** 记录基线指标 — 错误率：___% / p50：___ms / p99：___ms
+        - [ ] **3.1** 执行部署：`<具体命令>`
+        - [ ] **3.2** 健康检查通过：`curl <health-url>`
+        - [ ] **4.1** 执行灰度计划（见产物 3）
+        - [ ] **5.1** 冒烟测试通过
+        - [ ] **6.1** 监控 15 分钟，指标正常
+        - [ ] **6.2** 通知团队：部署完成
+
+        ### 中止条件
+        以下任一情况发生时，**立即执行回滚计划**：
+        - 错误率超基线 10%
+        - p99 延迟超基线 2 倍
+        - 健康端点返回非 200 超过 60 秒
+    validations:
+      required: true
+
+  - type: textarea
+    id: canary-plan
+    attributes:
+      label: "产物 3：灰度/金丝雀计划"
+      description: "分阶段流量切换 + 通过/回退门。参考 templates/canary-plan.md"
+      value: |
+        ### 灰度策略：流量分割 / 滚动发布 / 功能开关 / N/A
+
+        | 阶段 | 流量比例 | 烘焙时间 | 通过/回退标准 |
+        |------|---------|---------|-------------|
+        | 1 | 10% | 5 分钟 | 错误率 < 基线+1%，p50 < 基线+20% |
+        | 2 | 50% | 10 分钟 | 同上 |
+        | 3 | 100% | — | 全量发布 |
+
+        ### 灰度执行记录
+        - **阶段 1**：切换时间 ___，指标 ___，决策：通过/回退
+        - **阶段 2**：切换时间 ___，指标 ___，决策：通过/回退
+        - **阶段 3**：全量发布，监控 ___ 分钟
+
+        > 生产环境必须有灰度计划。仅 SEV-1 紧急修复可标注 N/A 并说明原因。
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback-plan
+    attributes:
+      label: "产物 4：回滚计划"
+      description: "出问题如何恢复。参考 templates/rollback-plan.md"
+      value: |
+        ### 回滚方式：修订版回退 / 镜像切换 / 功能开关 / 数据库回滚
+
+        **上一个稳定版本**：`<版本/修订版>`
+
+        ```bash
+        # 回滚命令（已提前测试）
+        <粘贴具体命令>
+        ```
+
+        **预估回滚时间**：___ 分钟
+        **数据影响**：无 / 有（说明）
+
+        ### 回滚后验证
+        - [ ] 服务恢复到上一版本
+        - [ ] 错误率回到基线
+        - [ ] 无数据损坏
+        - [ ] 通知团队
+
+        ### 沟通计划
+        | 时机 | 对象 | 渠道 | 内容 |
+        |------|------|------|------|
+        | 开始回滚 | 团队 | #deployments | "正在回滚 `<服务>` 到 `<版本>`" |
+        | 回滚完成 | 团队 | #deployments | "回滚完成，正在排查根因" |
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 补充说明
+      description: 特殊注意事项、依赖关系、需要协调的事项
